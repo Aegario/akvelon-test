@@ -1,26 +1,14 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+/** @jsxImportSource @emotion/react */
+import React, { VFC } from 'react'
+import { Global } from '@emotion/react'
+import { RootContainer } from 'containers/RootContainer'
+import { resetStyles } from 'constants/resetStyles'
 
-function App() {
+export const App: VFC = () => {
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+    <div>
+      <RootContainer />
+      <Global styles={resetStyles} />
     </div>
-  );
+  )
 }
-
-export default App;
