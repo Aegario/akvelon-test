@@ -1,5 +1,5 @@
 /** @jsxImportSource @emotion/react */
-import React, { VFC } from 'react'
+import React, { memo } from 'react'
 import { css } from '@emotion/react'
 
 interface Props {
@@ -7,7 +7,7 @@ interface Props {
   isInactiveMode: boolean;
 }
 
-export const ScoreDisplay: VFC<Props> = ({ score, isInactiveMode }) => {
+export const ScoreDisplay = memo<Props>(({ score, isInactiveMode }) => {
   return (
     <div css={
       css`
@@ -39,4 +39,4 @@ export const ScoreDisplay: VFC<Props> = ({ score, isInactiveMode }) => {
       </p>
     </div>
   )
-}
+})

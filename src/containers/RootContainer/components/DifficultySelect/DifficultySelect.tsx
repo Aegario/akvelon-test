@@ -1,5 +1,5 @@
 /** @jsxImportSource @emotion/react */
-import React, { ChangeEvent, VFC } from 'react'
+import React, { memo, ChangeEvent } from 'react'
 import { css } from '@emotion/react'
 import { DIFFICULTY } from 'constants'
 import { capitalize } from 'helpers'
@@ -24,7 +24,7 @@ interface Props {
   onChange: (val: DIFFICULTY) => void,
 }
 
-export const DifficultySelect: VFC<Props> = ({ value, onChange }) => {
+export const DifficultySelect = memo<Props>(({ value, onChange }) => {
   const handleChange = (e: ChangeEvent<HTMLSelectElement>) => {
     onChange(e.target.value as DIFFICULTY)
   }
@@ -108,4 +108,4 @@ export const DifficultySelect: VFC<Props> = ({ value, onChange }) => {
       </select>
     </div>
   )
-}
+})

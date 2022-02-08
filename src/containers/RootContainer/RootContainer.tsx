@@ -6,7 +6,7 @@ import { gamble, getConfig } from 'helpers'
 import { DIFFICULTY } from 'constants'
 import { Button, OverdriveCard, TrophyBoard, ScoreDisplay, DifficultySelect } from './components'
 
-const inactiveModeActivationTime = 10000
+const inactiveModeActivationTime = 2000
 const overdriveEnabled = true
 
 export const RootContainer: VFC = () => {
@@ -23,6 +23,11 @@ export const RootContainer: VFC = () => {
   const { overdriveDuration, overdriveChance, maxClicksPerSecond } = useMemo(
     () => getConfig(difficulty), [difficulty],
   )
+
+  useEffect(() => {
+    console.log('UPDATE')
+    console.log({ counter })
+  })
 
   const handleCounterIncrement = (increment: number) => {
     setCounter((val) => val + increment)
@@ -46,9 +51,9 @@ export const RootContainer: VFC = () => {
     setIsInactiveMode(false)
   }
 
-  const handleDifficultyChange = (val: DIFFICULTY) => {
+  const handleDifficultyChange = useCallback((val: DIFFICULTY) => {
     setDifficulty(val)
-  }
+  }, [])
 
   const throttledButtonClick = useCallback(
     throttle(handleButtonClick, 1000/maxClicksPerSecond),
