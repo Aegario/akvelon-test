@@ -1,0 +1,1 @@
+export { gamble } from './gamble'
