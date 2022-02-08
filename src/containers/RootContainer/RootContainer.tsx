@@ -45,26 +45,16 @@ export const RootContainer: VFC = () => {
     // this useEffect is responsible for decreasing
     // the counter when in inactive mode
     if (!isInInactiveMode) return
-    console.log('called', counter )
 
-    if (counter > 0) {
-      if (counter > 1) {
-        handleCounterDecrease()
-        decreaseIntervalIdRef.current = setInterval(handleCounterDecrease, 1000)
-      } else {
-        handleCounterDecrease()
-      }
-      decreaseIntervalIdRef.current = setInterval(handleCounterDecrease, 1000)
-    } else {
-      clearInterval(decreaseIntervalIdRef.current!)
-      decreaseIntervalIdRef.current = null
-    }
+    handleCounterDecrease()
+    decreaseIntervalIdRef.current = setInterval(handleCounterDecrease, 1000)
+  }, [isInInactiveMode])
 
-    return () => {
-      clearInterval(decreaseIntervalIdRef.current!)
-      decreaseIntervalIdRef.current = null
-    }
-  }, [isInInactiveMode, counter])
+  useEffect(() => {
+    if (counter) return
+    clearInterval(decreaseIntervalIdRef.current!)
+    decreaseIntervalIdRef.current = null
+  }, [counter])
 
 
   useEffect(() => {
