@@ -4,16 +4,15 @@ import { css } from '@emotion/react'
 import { throttle } from 'lodash'
 import { gamble, getConfig } from 'helpers'
 import { DIFFICULTY } from 'constants'
-import { DifficultySelect } from 'containers/RootContainer/components/DifficultySelect/DifficultySelect'
-import { OverdriveCard, TrophyBoard } from './components'
+import { Button, OverdriveCard, TrophyBoard, ScoreDisplay, DifficultySelect } from './components'
 
-const inactiveModeActivationTime = 2000
+const inactiveModeActivationTime = 10000
 const overdriveEnabled = true
 
 export const RootContainer: VFC = () => {
   const [counter, setCounter] = useState(0)
-  const [isInInactiveMode, setIsInInactiveMode] = useState(false)
-  const [overdriveMode, setOverdriveMode] = useState(false)
+  const [isInactiveMode, setIsInactiveMode] = useState(false)
+  const [isOverdriveMode, setIsOverdriveMode] = useState(false)
   const [overdriveTimer, setOverdriveTimer] = useState(0)
   const [difficulty, setDifficulty] = useState(DIFFICULTY.MEDIUM)
 
@@ -40,12 +39,11 @@ export const RootContainer: VFC = () => {
   const handleButtonClick = () => {
     const isOverdrive = overdriveEnabled ? gamble(overdriveChance) : false
     if (isOverdrive) {
-      if (!overdriveMode) setOverdriveMode(true)
+      if (!isOverdriveMode) setIsOverdriveMode(true)
       setOverdriveTimer(overdriveDuration)
     }
-    handleCounterIncrement(overdriveMode ? 2 : 1)
-    // handleCounterIncrement(300)
-    setIsInInactiveMode(false)
+    handleCounterIncrement(isOverdriveMode ? 2 : 1)
+    setIsInactiveMode(false)
   }
 
   const handleDifficultyChange = (val: DIFFICULTY) => {
@@ -54,49 +52,33 @@ export const RootContainer: VFC = () => {
 
   const throttledButtonClick = useCallback(
     throttle(handleButtonClick, 1000/maxClicksPerSecond),
-    [maxClicksPerSecond],
+    [maxClicksPerSecond, isOverdriveMode],
   )
 
   useEffect(() => {
-    console.log('Root Container update')
-    console.log({ overdriveDuration, overdriveChance, maxClicksPerSecond })
-    console.log({
-      counter,
-      isInInactiveMode,
-      overdriveMode,
-      overdriveTimer,
-    })
-  })
-
-
-  useEffect(() => {
-    // this useEffect is responsible for setting
-    // inactive mode state useEffect when 10 seconds has passed
-    // without activity
-    if (isInInactiveMode) return
-
-    inactiveTimeoutIdRef.current = setTimeout(() => setIsInInactiveMode(true), inactiveModeActivationTime)
+    // inactive mode useEffect
+    if (isInactiveMode) return
+    inactiveTimeoutIdRef.current = setTimeout(() => setIsInactiveMode(true), inactiveModeActivationTime)
 
     // clearing timeout when deps change and on unmount
     return () => {
       // only clears when counter is increasing
-      if (isInInactiveMode) return
+      if (isInactiveMode) return
       clearTimeout(inactiveTimeoutIdRef.current!)
       inactiveTimeoutIdRef.current = null
     }
-  }, [counter, isInInactiveMode])
+  }, [counter, isInactiveMode])
 
   useEffect(() => {
-    // this useEffect is responsible for decreasing
-    // the counter in inactive mode
-    if (isInInactiveMode && counter) {
+    // counter decrement useEffect
+    if (isInactiveMode && counter) {
       handleCounterDecrement()
       decreaseIntervalIdRef.current = setInterval(handleCounterDecrement, 1000)
-    } else if(!isInInactiveMode) {
+    } else if(!isInactiveMode) {
       clearInterval(decreaseIntervalIdRef.current!)
       decreaseIntervalIdRef.current = null
     }
-  }, [isInInactiveMode])
+  }, [isInactiveMode])
 
   useEffect(() => {
     // clears when counter is 0
@@ -107,18 +89,18 @@ export const RootContainer: VFC = () => {
 
   useEffect(() => {
     // overdriveMode useEffect
-    if (!overdriveTimer) setOverdriveMode(false)
+    if (!overdriveTimer) setIsOverdriveMode(false)
   }, [overdriveTimer])
 
   useEffect(() => {
     // overdriveTimer useEffect
-    if (overdriveMode) {
+    if (isOverdriveMode) {
       handleOverdriveTimerDecrement()
       overdriveIntervalIdRef.current = setInterval(handleOverdriveTimerDecrement, 1000)
     } else if (overdriveIntervalIdRef.current) {
       clearInterval(overdriveIntervalIdRef.current)
     }
-  }, [overdriveMode])
+  }, [isOverdriveMode])
 
 
   useEffect(() => () => {
@@ -146,7 +128,7 @@ export const RootContainer: VFC = () => {
       <DifficultySelect value={difficulty} onChange={handleDifficultyChange}/>
       <TrophyBoard score={counter}/>
 
-      {overdriveMode && (
+      {isOverdriveMode && (
         <div css={css`
           position: absolute;
           top: 2rem;
@@ -156,30 +138,7 @@ export const RootContainer: VFC = () => {
         </div>
       )}
 
-      <div css={css`
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-      `}>
-        <p css={css`
-          font-size: 1.625rem;
-          text-transform: uppercase;
-        `}>
-          Your score:
-        </p>
-
-        <p css={css`
-            color: ${counter % 10 === 0 
-            && counter !== 0 
-            && !isInInactiveMode ? '#bb2020' : 'unset'};
-            padding-bottom: 1.625rem;
-            padding-top: 1rem;
-            font-size: 3.25rem;
-          `}
-        >
-          {counter}
-        </p>
-      </div>
+      <ScoreDisplay score={counter} isInactiveMode={isInactiveMode} />
 
       <div css={
         css`
@@ -188,7 +147,7 @@ export const RootContainer: VFC = () => {
           align-items: center;
         `
       }>
-        {overdriveMode && (
+        {isOverdriveMode && (
           <div css={css`
               margin-right: 4rem;`
           }>
@@ -196,28 +155,15 @@ export const RootContainer: VFC = () => {
           </div>
         )}
 
-        <button
-          type='button'
+        <Button
           onClick={throttledButtonClick}
-          css={css`
-            padding: 1.25rem 6rem;
-            font-size: 1rem;
-            background-color: ${isInInactiveMode ? '#a19f9f' : '#8d6bce'};
-            border: ${overdriveMode ? '4px solid #bb2020' : 'none'};
-            border-radius: .375rem;
-            cursor: pointer;
-            opacity: .9;
-            max-height: 3.75rem;
-            text-transform: uppercase;
-            &:hover {
-              opacity: 1;
-              transition: .3s;
-            }`
-          }>
+          isInactiveMode={isInactiveMode}
+          isOverdriveMode={isOverdriveMode}
+        >
           Click me
-        </button>
+        </Button>
 
-        {overdriveMode && (
+        {isOverdriveMode && (
           <div css={css`
             margin-left: 4rem;
           `}>

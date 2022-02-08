@@ -12,7 +12,7 @@ interface Trophy {
 }
 
 const getTrophy = (score: number): Trophy =>
-  ({ text: `Congrats! You've reached ${score}!` })
+  ({ text: `Congrats! You've got ${score} score trophy!` })
 const trophyRoad = getTrophyRoad()
 
 export const TrophyBoard = memo<Props>(({ score }) => {
