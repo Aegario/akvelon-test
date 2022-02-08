@@ -56,5 +56,6 @@ export const resetStyles = css`
 
   html * {
     font-family: 'Roboto', sans-serif;
+    user-select: none;
   }
 `

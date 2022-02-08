@@ -1,22 +1,29 @@
 /** @jsxImportSource @emotion/react */
-import React, { useEffect, useRef, useState, VFC } from 'react'
+import React, { useCallback, useEffect, useMemo, useRef, useState, VFC } from 'react'
 import { css } from '@emotion/react'
 import { throttle } from 'lodash'
-import { gamble } from 'helpers'
-import { getTrophyRoad } from 'helpers/getTrophyRoad'
+import { gamble, getConfig } from 'helpers'
+import { DIFFICULTY } from 'constants'
+import { DifficultySelect } from 'containers/RootContainer/components/DifficultySelect/DifficultySelect'
 import { OverdriveCard, TrophyBoard } from './components'
 
 const inactiveModeActivationTime = 2000
-const overdriveDuration = 10
+const overdriveEnabled = true
 
 export const RootContainer: VFC = () => {
   const [counter, setCounter] = useState(0)
   const [isInInactiveMode, setIsInInactiveMode] = useState(false)
   const [overdriveMode, setOverdriveMode] = useState(false)
   const [overdriveTimer, setOverdriveTimer] = useState(0)
+  const [difficulty, setDifficulty] = useState(DIFFICULTY.MEDIUM)
+
   const inactiveTimeoutIdRef = useRef<number | null>(null)
   const decreaseIntervalIdRef = useRef<number | null>(null)
   const overdriveIntervalIdRef = useRef<number | null>(null)
+
+  const { overdriveDuration, overdriveChance, maxClicksPerSecond } = useMemo(
+    () => getConfig(difficulty), [difficulty],
+  )
 
   const handleCounterIncrement = (increment: number) => {
     setCounter((val) => val + increment)
@@ -31,19 +38,28 @@ export const RootContainer: VFC = () => {
   }
 
   const handleButtonClick = () => {
-    // const isOverdrive = gamble(10)
-    const isOverdrive = false
+    const isOverdrive = overdriveEnabled ? gamble(overdriveChance) : false
     if (isOverdrive) {
       if (!overdriveMode) setOverdriveMode(true)
       setOverdriveTimer(overdriveDuration)
     }
-    // handleCounterIncrement(overdriveMode ? 2 : 1)
-    handleCounterIncrement(300)
+    handleCounterIncrement(overdriveMode ? 2 : 1)
+    // handleCounterIncrement(300)
     setIsInInactiveMode(false)
   }
 
+  const handleDifficultyChange = (val: DIFFICULTY) => {
+    setDifficulty(val)
+  }
+
+  const throttledButtonClick = useCallback(
+    throttle(handleButtonClick, 1000/maxClicksPerSecond),
+    [maxClicksPerSecond],
+  )
+
   useEffect(() => {
     console.log('Root Container update')
+    console.log({ overdriveDuration, overdriveChance, maxClicksPerSecond })
     console.log({
       counter,
       isInInactiveMode,
@@ -52,8 +68,6 @@ export const RootContainer: VFC = () => {
     })
   })
 
-
-  const throttledButtonClick = throttle(handleButtonClick, 1000)
 
   useEffect(() => {
     // this useEffect is responsible for setting
@@ -108,7 +122,7 @@ export const RootContainer: VFC = () => {
 
 
   useEffect(() => () => {
-    // cleanup useEffect
+    // unmount cleanup useEffect
     if (decreaseIntervalIdRef.current) {
       clearInterval(decreaseIntervalIdRef.current)
     }
@@ -118,7 +132,6 @@ export const RootContainer: VFC = () => {
     }
   }, [])
 
-  getTrophyRoad()
   return (
     <div css={css`
       width: 100vw;
@@ -130,14 +143,16 @@ export const RootContainer: VFC = () => {
       position: relative;
     `}
     >
+      <DifficultySelect value={difficulty} onChange={handleDifficultyChange}/>
       <TrophyBoard score={counter}/>
 
       {overdriveMode && (
         <div css={css`
           position: absolute;
           top: 2rem;
+          font-size: 1.25rem;
         `}>
-          <p>Overdrive time: {overdriveTimer}</p>
+          <p>Overdrive time: {overdriveTimer} sec</p>
         </div>
       )}
 
@@ -146,14 +161,20 @@ export const RootContainer: VFC = () => {
         flex-direction: column;
         align-items: center;
       `}>
-        <p css={css`font-size: 1.625rem`}>Your score: </p>
+        <p css={css`
+          font-size: 1.625rem;
+          text-transform: uppercase;
+        `}>
+          Your score:
+        </p>
+
         <p css={css`
             color: ${counter % 10 === 0 
             && counter !== 0 
             && !isInInactiveMode ? '#bb2020' : 'unset'};
             padding-bottom: 1.625rem;
             padding-top: 1rem;
-            font-size: 2.25rem;
+            font-size: 3.25rem;
           `}
         >
           {counter}
@@ -180,12 +201,14 @@ export const RootContainer: VFC = () => {
           onClick={throttledButtonClick}
           css={css`
             padding: 1.25rem 6rem;
-            background-color: ${isInInactiveMode ? '#589558ff' : '#ad93dc'};
-            border: ${overdriveMode ? '2px solid #bb2020' : 'none'};
+            font-size: 1rem;
+            background-color: ${isInInactiveMode ? '#a19f9f' : '#8d6bce'};
+            border: ${overdriveMode ? '4px solid #bb2020' : 'none'};
             border-radius: .375rem;
             cursor: pointer;
             opacity: .9;
             max-height: 3.75rem;
+            text-transform: uppercase;
             &:hover {
               opacity: 1;
               transition: .3s;

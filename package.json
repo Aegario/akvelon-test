@@ -49,7 +49,7 @@
       "no-unused-vars": "warn",
       "consistent-return": "warn",
       "react/jsx-filename-extension": [2, { "extensions": [".js", ".jsx", ".ts", ".tsx"] }],
-      "react/jsx-max-props-per-line": [2, { "maximum": 1 }],
+      "react/jsx-max-props-per-line": [2, { "maximum": 2 }],
       "comma-dangle": ["error", "always-multiline"],
       "jsx-quotes": ["error", "prefer-single"],
       "quotes": ["error", "single"],
@@ -65,7 +65,9 @@
       "spaced-comment": 0,
       "import/prefer-default-export": "off",
       "react/function-component-definition": "off",
-      "arrow-parens": "error"
+      "arrow-parens": "error",
+      "no-shadow": "off",
+      "@typescript-eslint/no-shadow": ["error"]
     },
     "settings": {
       "import/resolver": {
