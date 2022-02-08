@@ -3,7 +3,8 @@ import React, { useEffect, useRef, useState, VFC } from 'react'
 import { css } from '@emotion/react'
 import { throttle } from 'lodash'
 import { gamble } from 'helpers'
-import { OverdriveCard } from './components'
+import { getTrophyRoad } from 'helpers/getTrophyRoad'
+import { OverdriveCard, TrophyBoard } from './components'
 
 const inactiveModeActivationTime = 2000
 const overdriveDuration = 10
@@ -30,14 +31,27 @@ export const RootContainer: VFC = () => {
   }
 
   const handleButtonClick = () => {
-    const isOverdrive = gamble(10)
+    // const isOverdrive = gamble(10)
+    const isOverdrive = false
     if (isOverdrive) {
       if (!overdriveMode) setOverdriveMode(true)
       setOverdriveTimer(overdriveDuration)
     }
-    handleCounterIncrement(overdriveMode ? 2 : 1)
+    // handleCounterIncrement(overdriveMode ? 2 : 1)
+    handleCounterIncrement(300)
     setIsInInactiveMode(false)
   }
+
+  useEffect(() => {
+    console.log('Root Container update')
+    console.log({
+      counter,
+      isInInactiveMode,
+      overdriveMode,
+      overdriveTimer,
+    })
+  })
+
 
   const throttledButtonClick = throttle(handleButtonClick, 1000)
 
@@ -60,14 +74,18 @@ export const RootContainer: VFC = () => {
 
   useEffect(() => {
     // this useEffect is responsible for decreasing
-    // the counter when in inactive mode
-    if (!isInInactiveMode || !counter) return
-
-    handleCounterDecrement()
-    decreaseIntervalIdRef.current = setInterval(handleCounterDecrement, 1000)
+    // the counter in inactive mode
+    if (isInInactiveMode && counter) {
+      handleCounterDecrement()
+      decreaseIntervalIdRef.current = setInterval(handleCounterDecrement, 1000)
+    } else if(!isInInactiveMode) {
+      clearInterval(decreaseIntervalIdRef.current!)
+      decreaseIntervalIdRef.current = null
+    }
   }, [isInInactiveMode])
 
   useEffect(() => {
+    // clears when counter is 0
     if (counter) return
     clearInterval(decreaseIntervalIdRef.current!)
     decreaseIntervalIdRef.current = null
@@ -100,6 +118,7 @@ export const RootContainer: VFC = () => {
     }
   }, [])
 
+  getTrophyRoad()
   return (
     <div css={css`
       width: 100vw;
@@ -111,6 +130,8 @@ export const RootContainer: VFC = () => {
       position: relative;
     `}
     >
+      <TrophyBoard score={counter}/>
+
       {overdriveMode && (
         <div css={css`
           position: absolute;
@@ -120,12 +141,18 @@ export const RootContainer: VFC = () => {
         </div>
       )}
 
-      <div>
+      <div css={css`
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      `}>
+        <p css={css`font-size: 1.625rem`}>Your score: </p>
         <p css={css`
             color: ${counter % 10 === 0 
             && counter !== 0 
             && !isInInactiveMode ? '#bb2020' : 'unset'};
             padding-bottom: 1.625rem;
+            padding-top: 1rem;
             font-size: 2.25rem;
           `}
         >
