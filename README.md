@@ -1,6 +1,6 @@
-# Тестовое задание Аквелон
-## Примечания
-1. Стили в самом jsx выглядят очень плохо, в том числе из-за форматирования
-2. Можно было бы более понятно написать эффекты в рутовом контейнере
-3. Можно было бы сделать темизацию, т.к. в данный момент все фонт сайзы, колоры, бэкграунды засечены рандомными (или скопипасчеными) значениями
-4. Можно было бы применить memo к бОльшему кол-ву компонентов (OverdriveCard)
+# Test task for Akvelon
+## Notes
+1. Inline styles look awful.
+2. Effects in RootContainer could have been made more readable.
+3. Theming could be done in order to get rid of magic numbers in css properties.
+4. React.memo could have been used more to optimize performance.
