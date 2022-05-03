@@ -4,3 +4,4 @@
 2. Effects in RootContainer could have been made more readable.
 3. Theming could be done in order to get rid of magic numbers in css properties.
 4. React.memo could have been used more to optimize performance.
+5. I was not able to produce the most understandable and clear code possible due to time restrictions
